@@ -1,0 +1,5 @@
+{
+  "packageManager": "python",
+  "packageName": "jupyterlab_refresh_view_extension",
+  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package jupyterlab_refresh_view_extension"
+}

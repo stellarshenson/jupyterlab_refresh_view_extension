@@ -1,0 +1,15 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.4.0
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: konrad.jelen@gmail.com
+author_name: Stellars Henson
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: jupyterlab_refresh_view_extension
+project_short_description: A JupyterLab to allow context menu option to refresh markdown
+    or notebook
+python_name: jupyterlab_refresh_view_extension
+repository: ''
+test: true
+
