@@ -1,27 +1,56 @@
-# jupyterlab_refresh_view_extension
+# JupyterLab Refresh View Extension
 
-[![Github Actions Status](/workflows/Build/badge.svg)](/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/workflows/Build/badge.svg)](https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/actions/workflows/build.yml)
+[![npm version](https://badge.fury.io/js/jupyterlab_refresh_view_extension.svg)](https://www.npmjs.com/package/jupyterlab_refresh_view_extension)
+[![PyPI version](https://badge.fury.io/py/jupyterlab-refresh-view-extension.svg)](https://pypi.org/project/jupyterlab-refresh-view-extension/)
 
-A JupyterLab to allow context menu option to refresh markdown or notebook
+JupyterLab extension that adds a **"Refresh View"** context menu command to reload file content from disk while preserving scroll position.
+
+## Features
+
+- **Context Menu Integration** - Right-click on markdown files, notebooks, or text editors to access the refresh command
+- **Scroll Position Preservation** - Automatically maintains your current scroll position after refreshing content
+- **Command Palette Access** - Available via command palette under "File Operations" category
+- **Smart Enable/Disable** - Only enabled when a document with context is active
+
+## Use Cases
+
+- **Iterative Editing** - Refresh files edited externally without losing your place
+- **Live Documentation** - Keep markdown files in sync with external updates
+- **Collaborative Work** - View changes from teammates without manual reload
+- **Build System Integration** - Refresh generated files after build processes
 
 ## Requirements
 
 - JupyterLab >= 4.0.0
 
-## Install
+## Installation
 
-To install the extension, execute:
+### From PyPI
 
 ```bash
-pip install jupyterlab_refresh_view_extension
+pip install jupyterlab-refresh-view-extension
 ```
+
+### From npm
+
+```bash
+jupyter labextension install jupyterlab_refresh_view_extension
+```
+
+## Usage
+
+1. Open a markdown file, notebook, or text file in JupyterLab
+2. Right-click anywhere in the document content
+3. Select **"Refresh View"** from the context menu
+4. The file reloads from disk while maintaining your scroll position
+
+Alternatively, open the command palette (`Ctrl+Shift+C` or `Cmd+Shift+C`) and search for "Refresh View".
 
 ## Uninstall
 
-To remove the extension, execute:
-
 ```bash
-pip uninstall jupyterlab_refresh_view_extension
+pip uninstall jupyterlab-refresh-view-extension
 ```
 
 ## Contributing

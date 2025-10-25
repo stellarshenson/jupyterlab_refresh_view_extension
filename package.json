@@ -1,15 +1,15 @@
 {
     "name": "jupyterlab_refresh_view_extension",
-    "version": "0.1.4",
-    "description": "A JupyterLab to allow context menu option to refresh markdown or notebook",
+    "version": "0.6.2",
+    "description": "JupyterLab extension adding context menu 'Refresh View' command to reload file content from disk while preserving scroll position",
     "keywords": [
         "jupyter",
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "",
+    "homepage": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension",
     "bugs": {
-        "url": "/issues"
+        "url": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/issues"
     },
     "license": "BSD-3-Clause",
     "author": {
@@ -26,7 +26,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": ".git"
+        "url": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
