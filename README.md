@@ -1,6 +1,6 @@
 # JupyterLab Refresh View Extension
 
-[![Github Actions Status](https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/workflows/Build/badge.svg)](https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/actions/workflows/build.yml)
+![Github Actions](https://github.com/github/docs/actions/workflows/build.yml/badge.svg)
 [![npm version](https://badge.fury.io/js/jupyterlab_refresh_view_extension.svg)](https://www.npmjs.com/package/jupyterlab_refresh_view_extension)
 [![PyPI version](https://badge.fury.io/py/jupyterlab-refresh-view-extension.svg)](https://pypi.org/project/jupyterlab-refresh-view-extension/)
 
