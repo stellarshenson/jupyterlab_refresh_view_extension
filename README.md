@@ -6,6 +6,8 @@
 
 JupyterLab extension that adds a **"Refresh View"** context menu command to reload file content from disk while preserving scroll position.
 
+![Refresh View Context Menu](.resources/screenshot.png)
+
 ## Features
 
 - **Context Menu Integration** - Right-click on markdown files, notebooks, or text editors to access the refresh command
