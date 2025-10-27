@@ -4,6 +4,7 @@
 [![npm version](https://badge.fury.io/js/jupyterlab_refresh_view_extension.svg)](https://www.npmjs.com/package/jupyterlab_refresh_view_extension)
 [![PyPI version](https://badge.fury.io/py/jupyterlab-refresh-view-extension.svg)](https://pypi.org/project/jupyterlab-refresh-view-extension/)
 ![PyPI downloads](https://img.shields.io/pypi/dm/jupyterlab-refresh-view-extension?label=PyPI%20downloads)
+![JL4 Ready](https://img.shields.io/badge/Jupyterlab%204-ready-blue)
 
 JupyterLab extension that adds a **"Refresh View"** context menu command to reload file content from disk while preserving scroll position.
 
