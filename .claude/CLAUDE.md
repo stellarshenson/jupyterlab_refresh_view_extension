@@ -1,0 +1,2 @@
+- do not autopublish or auto install, this is to be done explicitly by user
+- do not create tags unless user explicitly asked for
