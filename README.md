@@ -12,10 +12,13 @@ JupyterLab extension that adds a **"Refresh View"** context menu command to relo
 
 ## Features
 
-- **Context Menu Integration** - Right-click on markdown files, notebooks, or text editors to access the refresh command
-- **Scroll Position Preservation** - Automatically maintains your current scroll position after refreshing content
-- **Command Palette Access** - Available via command palette under "File Operations" category
-- **Smart Enable/Disable** - Only enabled when a document with context is active
+The extension provides intelligent content refresh while preserving your exact position in the document. For notebooks, it tracks both the visible cell and viewport offset, restoring your view even when JupyterLab's windowed rendering progressively loads cells. For markdown and text files, it maintains precise scroll coordinates.
+
+- **Hybrid Position Tracking** - Notebooks use cell-based anchoring with scroll fallback, ensuring position preservation regardless of content loading order
+- **Intelligent Stabilization** - Monitors content loading and adaptively restores position as cells render, stabilizing within 300ms typically
+- **Context Menu Integration** - Right-click access for markdown files, notebooks, and text editors
+- **Command Palette Access** - Available under "File Operations" category
+- **Smart Enable/Disable** - Only active when a document with reloadable context is open
 
 ## Use Cases
 
