@@ -12,11 +12,13 @@ JupyterLab extension that adds a **"Refresh View"** context menu command to relo
 
 ## Features
 
-The extension provides intelligent content refresh while preserving your exact position in the document. For notebooks, it tracks both the visible cell and viewport offset, restoring your view even when JupyterLab's windowed rendering progressively loads cells. For markdown and text files, it maintains precise scroll coordinates.
+The extension provides intelligent content refresh while preserving your exact position in the document. For notebooks, it identifies the visible cell in your viewport and automatically scrolls back to that cell after refresh, restoring both the cell position and viewport offset even when JupyterLab's windowed rendering progressively loads cells. For markdown and text files, it maintains precise scroll coordinates. The extension works seamlessly with [jupyterlab_tabular_data_viewer_extension](https://github.com/stellarshenson/jupyterlab_tabular_data_viewer_extension) to refresh CSV and tabular data files in their custom viewer.
 
-- **Hybrid Position Tracking** - Notebooks use cell-based anchoring with scroll fallback, ensuring position preservation regardless of content loading order
+- **Automatic Cell Scrolling** - Identifies visible notebook cell before refresh and automatically scrolls back to it afterward, preserving exact viewport position
+- **Hybrid Position Tracking** - Cell-based anchoring for notebooks with scroll coordinate fallback, ensuring position preservation regardless of content loading order
 - **Intelligent Stabilization** - Monitors content loading and adaptively restores position as cells render, stabilizing within 300ms typically
-- **Context Menu Integration** - Right-click access for markdown files, notebooks, and text editors
+- **Tabular Data Viewer Compatibility** - Works with jupyterlab_tabular_data_viewer_extension to refresh CSV files in custom tabular view
+- **Context Menu Integration** - Right-click access for markdown files, notebooks, text editors, and tabular data viewers
 - **Command Palette Access** - Available under "File Operations" category
 - **Smart Enable/Disable** - Only active when a document with reloadable context is open
 
