@@ -39,54 +39,74 @@ const plugin: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         const widget = app.shell.currentWidget;
         if (!widget) {
-          console.log('No current widget');
+          // console.log('No current widget');
           return;
         }
 
         const context = docManager.contextForWidget(widget);
         if (!context) {
-          console.log('No context for widget');
+          // console.log('No context for widget');
           return;
         }
 
-        // Store scroll position
-        const scrollPositions = new Map<Element, { top: number; left: number }>();
+        // Find the scrollable container
+        const scrollContainer = widget.node.querySelector('.jp-WindowedPanel-outer') ||
+                               widget.node.querySelector('.jp-RenderedMarkdown') ||
+                               widget.node.querySelector('.jp-FileEditor');
 
-        // Find all scrollable elements and store their positions
-        const scrollableElements = widget.node.querySelectorAll(
-          '.jp-RenderedMarkdown, .jp-Notebook, .jp-OutputArea-output, .jp-FileEditor, .jp-MarkdownViewer'
-        );
-        scrollableElements.forEach(element => {
-          scrollPositions.set(element, {
-            top: element.scrollTop,
-            left: element.scrollLeft
-          });
-        });
+        let savedScrollTop = 0;
+        let savedScrollLeft = 0;
 
-        // Also check for scrollable parent containers
-        const scrollableParent = widget.node.querySelector('.jp-WindowedPanel-outer, .lm-Widget');
-        if (scrollableParent) {
-          scrollPositions.set(scrollableParent, {
-            top: scrollableParent.scrollTop,
-            left: scrollableParent.scrollLeft
-          });
+        if (scrollContainer) {
+          savedScrollTop = scrollContainer.scrollTop;
+          savedScrollLeft = scrollContainer.scrollLeft;
+          // console.log(`Saving scroll position: top=${savedScrollTop}, left=${savedScrollLeft}`);
         }
 
         try {
           // Reload the document from disk
           await context.revert();
 
-          // Restore scroll positions after a short delay to allow rendering
-          setTimeout(() => {
-            scrollPositions.forEach((position, element) => {
-              if (element && element.parentNode) {
-                element.scrollTop = position.top;
-                element.scrollLeft = position.left;
-              }
-            });
-          }, 150);
+          // Restore scroll position - keep restoring until content loads
+          if (scrollContainer && savedScrollTop > 0) {
+            const restoreScroll = () => {
+              scrollContainer.scrollTop = savedScrollTop;
+              scrollContainer.scrollLeft = savedScrollLeft;
+            };
 
-          console.log(`Refreshed: ${context.path}`);
+            // Immediately restore to trigger windowed rendering
+            restoreScroll();
+
+            // Keep restoring until scroll position stabilizes or max attempts reached
+            let attempts = 0;
+            let stableCount = 0;
+            const maxAttempts = 50;
+            const intervalId = setInterval(() => {
+              const currentScroll = scrollContainer.scrollTop;
+              restoreScroll();
+
+              // Check if scroll position is stable (within 1px of target for 3 consecutive checks)
+              if (Math.abs(currentScroll - savedScrollTop) < 1) {
+                stableCount++;
+                if (stableCount >= 3) {
+                  clearInterval(intervalId);
+                  // console.log(`Refreshed: ${context.path}, scroll stable at ${scrollContainer.scrollTop}`);
+                  return;
+                }
+              } else {
+                stableCount = 0;
+              }
+
+              attempts++;
+              if (attempts >= maxAttempts) {
+                clearInterval(intervalId);
+                // console.log(`Refreshed: ${context.path}, max attempts reached, final scroll: ${scrollContainer.scrollTop}`);
+              }
+            }, 100);
+          } else {
+            // console.log(`Refreshed: ${context.path}`);
+          }
+
         } catch (error) {
           console.error('Failed to refresh document:', error);
         }
