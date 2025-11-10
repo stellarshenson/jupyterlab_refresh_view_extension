@@ -56,10 +56,33 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
         let savedScrollTop = 0;
         let savedScrollLeft = 0;
+        let targetCellIndex = -1;
+        let cellOffsetTop = 0;
 
         if (scrollContainer) {
           savedScrollTop = scrollContainer.scrollTop;
           savedScrollLeft = scrollContainer.scrollLeft;
+
+          // For notebooks, try to find which cell is currently visible
+          const cells = Array.from(widget.node.querySelectorAll('.jp-Cell'));
+          if (cells.length > 0) {
+            const containerRect = scrollContainer.getBoundingClientRect();
+
+            // Find the first cell that's visible in viewport
+            for (let i = 0; i < cells.length; i++) {
+              const cell = cells[i];
+              const cellRect = cell.getBoundingClientRect();
+              const relativeTop = cellRect.top - containerRect.top;
+
+              // If cell is visible (top is within viewport or just above it)
+              if (relativeTop >= -cellRect.height && relativeTop <= containerRect.height) {
+                targetCellIndex = i;
+                cellOffsetTop = relativeTop;
+                // console.log(`Saving cell position: index=${targetCellIndex}, offset=${cellOffsetTop}`);
+                break;
+              }
+            }
+          }
           // console.log(`Saving scroll position: top=${savedScrollTop}, left=${savedScrollLeft}`);
         }
 
@@ -67,30 +90,49 @@ const plugin: JupyterFrontEndPlugin<void> = {
           // Reload the document from disk
           await context.revert();
 
-          // Restore scroll position - keep restoring until content loads
-          if (scrollContainer && savedScrollTop > 0) {
-            const restoreScroll = () => {
+          // Restore position - prefer cell-based restoration for notebooks
+          if (scrollContainer && (targetCellIndex >= 0 || savedScrollTop > 0)) {
+            const restorePosition = () => {
+              // Try cell-based restoration first
+              if (targetCellIndex >= 0) {
+                const cells = Array.from(widget.node.querySelectorAll('.jp-Cell'));
+                if (targetCellIndex < cells.length) {
+                  const targetCell = cells[targetCellIndex] as HTMLElement;
+                  const containerRect = scrollContainer.getBoundingClientRect();
+                  const cellRect = targetCell.getBoundingClientRect();
+                  const currentOffset = cellRect.top - containerRect.top;
+
+                  // Scroll to restore the cell to its original offset position
+                  scrollContainer.scrollTop += (currentOffset - cellOffsetTop);
+                  scrollContainer.scrollLeft = savedScrollLeft;
+                  return true;
+                }
+              }
+
+              // Fallback to scroll position restoration
               scrollContainer.scrollTop = savedScrollTop;
               scrollContainer.scrollLeft = savedScrollLeft;
+              return false;
             };
 
             // Immediately restore to trigger windowed rendering
-            restoreScroll();
+            restorePosition();
 
-            // Keep restoring until scroll position stabilizes or max attempts reached
+            // Keep restoring until position stabilizes or max attempts reached
             let attempts = 0;
             let stableCount = 0;
             const maxAttempts = 50;
             const intervalId = setInterval(() => {
               const currentScroll = scrollContainer.scrollTop;
-              restoreScroll();
+              const usedCellBased = restorePosition();
 
               // Check if scroll position is stable (within 1px of target for 3 consecutive checks)
-              if (Math.abs(currentScroll - savedScrollTop) < 1) {
+              const targetScroll = usedCellBased ? scrollContainer.scrollTop : savedScrollTop;
+              if (Math.abs(currentScroll - targetScroll) < 1) {
                 stableCount++;
                 if (stableCount >= 3) {
                   clearInterval(intervalId);
-                  // console.log(`Refreshed: ${context.path}, scroll stable at ${scrollContainer.scrollTop}`);
+                  // console.log(`Refreshed: ${context.path}, scroll stable at ${scrollContainer.scrollTop}, cell-based: ${usedCellBased}`);
                   return;
                 }
               } else {
