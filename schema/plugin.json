@@ -29,7 +29,7 @@
       "title": "Markdown/Text Stabilization Timeout (milliseconds)",
       "description": "Maximum duration to monitor for scroll position drift in markdown and text files. Increase if images load slowly.",
       "type": "number",
-      "default": 5000,
+      "default": 3000,
       "minimum": 1000,
       "maximum": 30000
     }

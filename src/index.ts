@@ -47,7 +47,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       notebookScrollRestoration: true,
       markdownScrollRestoration: true,
       notebookTimeout: 5000,
-      markdownTimeout: 5000
+      markdownTimeout: 3000
     };
 
     // Load settings if available
@@ -59,7 +59,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           settings.markdownScrollRestoration = loadedSettings.get('markdownScrollRestoration').composite as boolean;
           settings.notebookTimeout = loadedSettings.get('notebookTimeout').composite as number;
           settings.markdownTimeout = loadedSettings.get('markdownTimeout').composite as number;
-          console.log('[SETTINGS] Loaded:', settings);
+          // console.log('[SETTINGS] Loaded:', settings);
 
           // Watch for setting changes
           loadedSettings.changed.connect(() => {
@@ -67,7 +67,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
             settings.markdownScrollRestoration = loadedSettings.get('markdownScrollRestoration').composite as boolean;
             settings.notebookTimeout = loadedSettings.get('notebookTimeout').composite as number;
             settings.markdownTimeout = loadedSettings.get('markdownTimeout').composite as number;
-            console.log('[SETTINGS] Updated:', settings);
+            // console.log('[SETTINGS] Updated:', settings);
           });
         })
         .catch(reason => {
@@ -255,7 +255,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
                   if (!isNotebook && settings.markdownScrollRestoration) {
                     let guardAttempts = 0;
                     const maxGuardAttempts = Math.floor(settings.markdownTimeout / 100); // timeout in ms / 100ms per check
+                    let userScrollDetected = false;
+
+                    // Detect user-initiated scrolling to exit guard mode immediately
+                    const userScrollHandler = () => {
+                      userScrollDetected = true;
+                    };
+                    scrollContainer.addEventListener('wheel', userScrollHandler, { once: true, passive: true });
+                    scrollContainer.addEventListener('touchstart', userScrollHandler, { once: true, passive: true });
+
                     const guardIntervalId = setInterval(() => {
+                      // Exit immediately if user starts scrolling
+                      if (userScrollDetected) {
+                        clearInterval(guardIntervalId);
+                        scrollContainer.removeEventListener('wheel', userScrollHandler);
+                        scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                        return;
+                      }
+
                       const currentPos = scrollContainer.scrollTop;
                       const drift = Math.abs(currentPos - savedScrollTop);
 
@@ -267,6 +284,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       guardAttempts++;
                       if (guardAttempts >= maxGuardAttempts) {
                         clearInterval(guardIntervalId);
+                        scrollContainer.removeEventListener('wheel', userScrollHandler);
+                        scrollContainer.removeEventListener('touchstart', userScrollHandler);
                       }
                     }, 100);
                   }
