@@ -1,0 +1,38 @@
+{
+  "jupyter.lab.setting-icon": "ui-components:refresh",
+  "jupyter.lab.setting-icon-label": "Refresh View Settings",
+  "title": "Refresh View",
+  "description": "Refresh View extension settings",
+  "type": "object",
+  "properties": {
+    "notebookScrollRestoration": {
+      "title": "Notebook Scroll Restoration",
+      "description": "Enable adaptive scroll restoration for notebooks (cell-based tracking with stabilization)",
+      "type": "boolean",
+      "default": true
+    },
+    "markdownScrollRestoration": {
+      "title": "Markdown/Text Scroll Restoration",
+      "description": "Enable adaptive scroll restoration for markdown and text files (guard mode with interference detection)",
+      "type": "boolean",
+      "default": true
+    },
+    "notebookTimeout": {
+      "title": "Notebook Stabilization Timeout (milliseconds)",
+      "description": "Maximum duration to wait for notebook cell rendering and content stabilization. Increase for large notebooks with many cells.",
+      "type": "number",
+      "default": 5000,
+      "minimum": 1000,
+      "maximum": 30000
+    },
+    "markdownTimeout": {
+      "title": "Markdown/Text Stabilization Timeout (milliseconds)",
+      "description": "Maximum duration to monitor for scroll position drift in markdown and text files. Increase if images load slowly.",
+      "type": "number",
+      "default": 5000,
+      "minimum": 1000,
+      "maximum": 30000
+    }
+  },
+  "additionalProperties": false
+}
