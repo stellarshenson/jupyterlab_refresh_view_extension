@@ -179,6 +179,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
             restorePosition();
             // console.log(`[RESTORE-START] After first restore: scrollTop=${scrollContainer.scrollTop}px`);
 
+            // Detect user-initiated scrolling to stop restoration immediately
+            let userScrollDetected = false;
+            const userScrollHandler = () => {
+              userScrollDetected = true;
+            };
+            scrollContainer.addEventListener('wheel', userScrollHandler, { once: true, passive: true });
+            scrollContainer.addEventListener('touchstart', userScrollHandler, { once: true, passive: true });
+
             // Smart adaptive stabilization - tracks both scroll position AND content height changes
             let attempts = 0;
             let stableCount = 0;
@@ -231,6 +239,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
             // console.log(`[SETUP] maxAttempts=${maxAttempts}, stabilityThreshold=${stabilityThreshold}, hasMermaid=${hasMermaid}, totalImages=${totalImages}`);
 
             const intervalId = setInterval(() => {
+              // Exit immediately if user starts scrolling
+              if (userScrollDetected) {
+                clearInterval(intervalId);
+                scrollContainer.removeEventListener('wheel', userScrollHandler);
+                scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                return;
+              }
+
               const currentScrollHeight = scrollContainer.scrollHeight;
               const currentScrollTop = scrollContainer.scrollTop;
               const usedCellBased = restorePosition();
@@ -248,6 +264,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
                 stableCount++;
                 if (stableCount >= stabilityThreshold) {
                   clearInterval(intervalId);
+                  // Clean up stabilization phase event listeners
+                  scrollContainer.removeEventListener('wheel', userScrollHandler);
+                  scrollContainer.removeEventListener('touchstart', userScrollHandler);
                   // Note: Image listeners auto-cleanup via { once: true } option
                   // console.log(`[DONE] Stabilized at ${scrollContainer.scrollTop}px after ${attempts} attempts, imagesLoaded=${loadedImageCount}/${totalImages}`);
 
@@ -255,21 +274,21 @@ const plugin: JupyterFrontEndPlugin<void> = {
                   if (!isNotebook && settings.markdownScrollRestoration) {
                     let guardAttempts = 0;
                     const maxGuardAttempts = Math.floor(settings.markdownTimeout / 100); // timeout in ms / 100ms per check
-                    let userScrollDetected = false;
+                    let guardUserScrollDetected = false;
 
                     // Detect user-initiated scrolling to exit guard mode immediately
-                    const userScrollHandler = () => {
-                      userScrollDetected = true;
+                    const guardUserScrollHandler = () => {
+                      guardUserScrollDetected = true;
                     };
-                    scrollContainer.addEventListener('wheel', userScrollHandler, { once: true, passive: true });
-                    scrollContainer.addEventListener('touchstart', userScrollHandler, { once: true, passive: true });
+                    scrollContainer.addEventListener('wheel', guardUserScrollHandler, { once: true, passive: true });
+                    scrollContainer.addEventListener('touchstart', guardUserScrollHandler, { once: true, passive: true });
 
                     const guardIntervalId = setInterval(() => {
                       // Exit immediately if user starts scrolling
-                      if (userScrollDetected) {
+                      if (guardUserScrollDetected) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener('wheel', userScrollHandler);
-                        scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                        scrollContainer.removeEventListener('wheel', guardUserScrollHandler);
+                        scrollContainer.removeEventListener('touchstart', guardUserScrollHandler);
                         return;
                       }
 
@@ -284,8 +303,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       guardAttempts++;
                       if (guardAttempts >= maxGuardAttempts) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener('wheel', userScrollHandler);
-                        scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                        scrollContainer.removeEventListener('wheel', guardUserScrollHandler);
+                        scrollContainer.removeEventListener('touchstart', guardUserScrollHandler);
                       }
                     }, 100);
                   }
@@ -302,6 +321,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
               if (attempts >= maxAttempts) {
                 clearInterval(intervalId);
+                // Clean up stabilization phase event listeners
+                scrollContainer.removeEventListener('wheel', userScrollHandler);
+                scrollContainer.removeEventListener('touchstart', userScrollHandler);
                 // Note: Image listeners auto-cleanup via { once: true } option
                 // console.log(`[TIMEOUT] Max attempts (${maxAttempts}) reached, final scroll: ${scrollContainer.scrollTop}px, imagesLoaded=${loadedImageCount}/${totalImages}`);
 
