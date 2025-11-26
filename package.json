@@ -1,6 +1,6 @@
 {
     "name": "jupyterlab_refresh_view_extension",
-    "version": "1.2.18",
+    "version": "1.2.19",
     "description": "JupyterLab extension adding context menu 'Refresh View' command to reload file content from disk while preserving scroll position",
     "keywords": [
         "jupyter",
