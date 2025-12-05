@@ -3,6 +3,7 @@
 [![GitHub Actions](https://github.com/stellarshenson/jupyterlab_refresh_view_extension/actions/workflows/build.yml/badge.svg)](https://github.com/stellarshenson/jupyterlab_refresh_view_extension/actions/workflows/build.yml)
 [![npm version](https://img.shields.io/npm/v/jupyterlab_refresh_view_extension.svg)](https://www.npmjs.com/package/jupyterlab_refresh_view_extension)
 [![PyPI version](https://img.shields.io/pypi/v/jupyterlab-refresh-view-extension.svg)](https://pypi.org/project/jupyterlab-refresh-view-extension/)
+[![JupyterLab Marketplace](https://labextensions.dev/api/badge/jupyterlab-refresh-view-extension?metric=downloads&leftColor=%23555&rightColor=%23F37620&style=flat)](https://labextensions.dev/extensions/jupyterlab-refresh-view-extension)
 [![Total PyPI downloads](https://static.pepy.tech/badge/jupyterlab-refresh-view-extension)](https://pepy.tech/project/jupyterlab-refresh-view-extension)
 [![JupyterLab 4](https://img.shields.io/badge/JupyterLab-4-orange.svg)](https://jupyterlab.readthedocs.io/en/stable/)
 [![Brought To You By KOLOMOLO](https://img.shields.io/badge/Brought%20To%20You%20By-KOLOMOLO-00ffff?style=flat)](https://kolomolo.com)

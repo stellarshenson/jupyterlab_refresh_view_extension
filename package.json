@@ -7,9 +7,9 @@
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension",
+    "homepage": "https://github.com/stellarshenson/jupyterlab_refresh_view_extension",
     "bugs": {
-        "url": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension/issues"
+        "url": "https://github.com/stellarshenson/jupyterlab_refresh_view_extension/issues"
     },
     "license": "BSD-3-Clause",
     "author": {
@@ -26,7 +26,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/the-cog-conf/jupyterlab_refresh_view_extension.git"
+        "url": "https://github.com/stellarshenson/jupyterlab_refresh_view_extension.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
