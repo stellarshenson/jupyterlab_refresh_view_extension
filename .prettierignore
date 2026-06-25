@@ -4,3 +4,4 @@ node_modules
 **/package.json
 !/package.json
 jupyterlab_refresh_view_extension
+.claude

@@ -3,13 +3,19 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { ICommandPalette, ToolbarButton } from '@jupyterlab/apputils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { refreshIcon } from '@jupyterlab/ui-components';
+
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 /**
  * Settings interface
@@ -43,7 +49,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     );
 
     // Settings with defaults
-    let settings: IRefreshViewSettings = {
+    const settings: IRefreshViewSettings = {
       notebookScrollRestoration: true,
       markdownScrollRestoration: true,
       notebookTimeout: 5000,
@@ -55,18 +61,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
       settingRegistry
         .load(plugin.id)
         .then(loadedSettings => {
-          settings.notebookScrollRestoration = loadedSettings.get('notebookScrollRestoration').composite as boolean;
-          settings.markdownScrollRestoration = loadedSettings.get('markdownScrollRestoration').composite as boolean;
-          settings.notebookTimeout = loadedSettings.get('notebookTimeout').composite as number;
-          settings.markdownTimeout = loadedSettings.get('markdownTimeout').composite as number;
+          settings.notebookScrollRestoration = loadedSettings.get(
+            'notebookScrollRestoration'
+          ).composite as boolean;
+          settings.markdownScrollRestoration = loadedSettings.get(
+            'markdownScrollRestoration'
+          ).composite as boolean;
+          settings.notebookTimeout = loadedSettings.get('notebookTimeout')
+            .composite as number;
+          settings.markdownTimeout = loadedSettings.get('markdownTimeout')
+            .composite as number;
           // console.log('[SETTINGS] Loaded:', settings);
 
           // Watch for setting changes
           loadedSettings.changed.connect(() => {
-            settings.notebookScrollRestoration = loadedSettings.get('notebookScrollRestoration').composite as boolean;
-            settings.markdownScrollRestoration = loadedSettings.get('markdownScrollRestoration').composite as boolean;
-            settings.notebookTimeout = loadedSettings.get('notebookTimeout').composite as number;
-            settings.markdownTimeout = loadedSettings.get('markdownTimeout').composite as number;
+            settings.notebookScrollRestoration = loadedSettings.get(
+              'notebookScrollRestoration'
+            ).composite as boolean;
+            settings.markdownScrollRestoration = loadedSettings.get(
+              'markdownScrollRestoration'
+            ).composite as boolean;
+            settings.notebookTimeout = loadedSettings.get('notebookTimeout')
+              .composite as number;
+            settings.markdownTimeout = loadedSettings.get('markdownTimeout')
+              .composite as number;
             // console.log('[SETTINGS] Updated:', settings);
           });
         })
@@ -96,9 +114,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
 
         // Find the scrollable container
-        const scrollContainer = widget.node.querySelector('.jp-WindowedPanel-outer') ||
-                               widget.node.querySelector('.jp-RenderedMarkdown') ||
-                               widget.node.querySelector('.jp-FileEditor');
+        const scrollContainer =
+          widget.node.querySelector('.jp-WindowedPanel-outer') ||
+          widget.node.querySelector('.jp-RenderedMarkdown') ||
+          widget.node.querySelector('.jp-FileEditor');
 
         let savedScrollTop = 0;
         let savedScrollLeft = 0;
@@ -123,7 +142,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
               const relativeTop = cellRect.top - containerRect.top;
 
               // If cell is visible (top is within viewport or just above it)
-              if (relativeTop >= -cellRect.height && relativeTop <= containerRect.height) {
+              if (
+                relativeTop >= -cellRect.height &&
+                relativeTop <= containerRect.height
+              ) {
                 targetCellIndex = i;
                 cellOffsetTop = relativeTop;
                 // console.log(`[SAVE] Cell position: index=${targetCellIndex}, offset=${cellOffsetTop}px`);
@@ -148,12 +170,19 @@ const plugin: JupyterFrontEndPlugin<void> = {
           // }
 
           // Restore scroll position based on settings
-          if (scrollContainer && ((isNotebook && settings.notebookScrollRestoration) || (!isNotebook && settings.markdownScrollRestoration && savedScrollTop > 0))) {
-
+          if (
+            scrollContainer &&
+            ((isNotebook && settings.notebookScrollRestoration) ||
+              (!isNotebook &&
+                settings.markdownScrollRestoration &&
+                savedScrollTop > 0))
+          ) {
             const restorePosition = () => {
               if (isNotebook) {
                 // Notebook: cell-based restoration
-                const cells = Array.from(widget.node.querySelectorAll('.jp-Cell'));
+                const cells = Array.from(
+                  widget.node.querySelectorAll('.jp-Cell')
+                );
                 if (targetCellIndex < cells.length) {
                   const targetCell = cells[targetCellIndex] as HTMLElement;
                   const containerRect = scrollContainer.getBoundingClientRect();
@@ -161,7 +190,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
                   const currentOffset = cellRect.top - containerRect.top;
 
                   // Scroll to restore the cell to its original offset position
-                  scrollContainer.scrollTop += (currentOffset - cellOffsetTop);
+                  scrollContainer.scrollTop += currentOffset - cellOffsetTop;
                   scrollContainer.scrollLeft = savedScrollLeft;
                   return true;
                 }
@@ -184,8 +213,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
             const userScrollHandler = () => {
               userScrollDetected = true;
             };
-            scrollContainer.addEventListener('wheel', userScrollHandler, { once: true, passive: true });
-            scrollContainer.addEventListener('touchstart', userScrollHandler, { once: true, passive: true });
+            scrollContainer.addEventListener('wheel', userScrollHandler, {
+              once: true,
+              passive: true
+            });
+            scrollContainer.addEventListener('touchstart', userScrollHandler, {
+              once: true,
+              passive: true
+            });
 
             // Smart adaptive stabilization - tracks both scroll position AND content height changes
             let attempts = 0;
@@ -194,8 +229,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
             let lastScrollTop = scrollContainer.scrollTop;
 
             // Check for content that requires longer rendering time
-            const hasMermaid = widget.node.querySelector('.jp-RenderedMarkdown pre code.language-mermaid') !== null;
-            const images = Array.from(widget.node.querySelectorAll('.jp-RenderedMarkdown img')) as HTMLImageElement[];
+            const hasMermaid =
+              widget.node.querySelector(
+                '.jp-RenderedMarkdown pre code.language-mermaid'
+              ) !== null;
+            const images = Array.from(
+              widget.node.querySelectorAll('.jp-RenderedMarkdown img')
+            ) as HTMLImageElement[];
             const hasImages = images.length > 0;
 
             // Track image loading state
@@ -232,9 +272,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
             });
 
             // Determine which timeout to use based on content type (isNotebook already defined above)
-            const timeout = isNotebook ? settings.notebookTimeout : settings.markdownTimeout;
+            const timeout = isNotebook
+              ? settings.notebookTimeout
+              : settings.markdownTimeout;
             const maxAttempts = Math.floor(timeout / 100); // converts ms to number of 100ms checks
-            const stabilityThreshold = (hasImages || hasMermaid) ? 5 : 3;
+            const stabilityThreshold = hasImages || hasMermaid ? 5 : 3;
 
             // console.log(`[SETUP] maxAttempts=${maxAttempts}, stabilityThreshold=${stabilityThreshold}, hasMermaid=${hasMermaid}, totalImages=${totalImages}`);
 
@@ -243,7 +285,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
               if (userScrollDetected) {
                 clearInterval(intervalId);
                 scrollContainer.removeEventListener('wheel', userScrollHandler);
-                scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                scrollContainer.removeEventListener(
+                  'touchstart',
+                  userScrollHandler
+                );
                 return;
               }
 
@@ -252,9 +297,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
               const usedCellBased = restorePosition();
 
               // Check both scroll position stability AND content height stability
-              const scrollStable = Math.abs(currentScrollTop - lastScrollTop) < 1;
-              const heightStable = Math.abs(currentScrollHeight - lastScrollHeight) < 1;
-              const targetScroll = usedCellBased ? scrollContainer.scrollTop : savedScrollTop;
+              const scrollStable =
+                Math.abs(currentScrollTop - lastScrollTop) < 1;
+              const heightStable =
+                Math.abs(currentScrollHeight - lastScrollHeight) < 1;
+              const targetScroll = usedCellBased
+                ? scrollContainer.scrollTop
+                : savedScrollTop;
               const atTarget = Math.abs(currentScrollTop - targetScroll) < 1;
 
               // console.log(`[RESTORE] Attempt ${attempts}: scrollTop=${currentScrollTop}px, target=${targetScroll}px, height=${currentScrollHeight}px, heightChange=${currentScrollHeight - lastScrollHeight}px, atTarget=${atTarget}, scrollStable=${scrollStable}, heightStable=${heightStable}, imagesLoaded=${_allImagesLoaded}, stable=${stableCount}/${stabilityThreshold}`);
@@ -265,30 +314,52 @@ const plugin: JupyterFrontEndPlugin<void> = {
                 if (stableCount >= stabilityThreshold) {
                   clearInterval(intervalId);
                   // Clean up stabilization phase event listeners
-                  scrollContainer.removeEventListener('wheel', userScrollHandler);
-                  scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                  scrollContainer.removeEventListener(
+                    'wheel',
+                    userScrollHandler
+                  );
+                  scrollContainer.removeEventListener(
+                    'touchstart',
+                    userScrollHandler
+                  );
                   // Note: Image listeners auto-cleanup via { once: true } option
                   // console.log(`[DONE] Stabilized at ${scrollContainer.scrollTop}px after ${attempts} attempts, imagesLoaded=${loadedImageCount}/${totalImages}`);
 
                   // Add guard mode for markdown files to fight JupyterLab's scroll restoration
                   if (!isNotebook && settings.markdownScrollRestoration) {
                     let guardAttempts = 0;
-                    const maxGuardAttempts = Math.floor(settings.markdownTimeout / 100); // timeout in ms / 100ms per check
+                    const maxGuardAttempts = Math.floor(
+                      settings.markdownTimeout / 100
+                    ); // timeout in ms / 100ms per check
                     let guardUserScrollDetected = false;
 
                     // Detect user-initiated scrolling to exit guard mode immediately
                     const guardUserScrollHandler = () => {
                       guardUserScrollDetected = true;
                     };
-                    scrollContainer.addEventListener('wheel', guardUserScrollHandler, { once: true, passive: true });
-                    scrollContainer.addEventListener('touchstart', guardUserScrollHandler, { once: true, passive: true });
+                    scrollContainer.addEventListener(
+                      'wheel',
+                      guardUserScrollHandler,
+                      { once: true, passive: true }
+                    );
+                    scrollContainer.addEventListener(
+                      'touchstart',
+                      guardUserScrollHandler,
+                      { once: true, passive: true }
+                    );
 
                     const guardIntervalId = setInterval(() => {
                       // Exit immediately if user starts scrolling
                       if (guardUserScrollDetected) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener('wheel', guardUserScrollHandler);
-                        scrollContainer.removeEventListener('touchstart', guardUserScrollHandler);
+                        scrollContainer.removeEventListener(
+                          'wheel',
+                          guardUserScrollHandler
+                        );
+                        scrollContainer.removeEventListener(
+                          'touchstart',
+                          guardUserScrollHandler
+                        );
                         return;
                       }
 
@@ -303,8 +374,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       guardAttempts++;
                       if (guardAttempts >= maxGuardAttempts) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener('wheel', guardUserScrollHandler);
-                        scrollContainer.removeEventListener('touchstart', guardUserScrollHandler);
+                        scrollContainer.removeEventListener(
+                          'wheel',
+                          guardUserScrollHandler
+                        );
+                        scrollContainer.removeEventListener(
+                          'touchstart',
+                          guardUserScrollHandler
+                        );
                       }
                     }, 100);
                   }
@@ -323,20 +400,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
                 clearInterval(intervalId);
                 // Clean up stabilization phase event listeners
                 scrollContainer.removeEventListener('wheel', userScrollHandler);
-                scrollContainer.removeEventListener('touchstart', userScrollHandler);
+                scrollContainer.removeEventListener(
+                  'touchstart',
+                  userScrollHandler
+                );
                 // Note: Image listeners auto-cleanup via { once: true } option
                 // console.log(`[TIMEOUT] Max attempts (${maxAttempts}) reached, final scroll: ${scrollContainer.scrollTop}px, imagesLoaded=${loadedImageCount}/${totalImages}`);
 
                 // Take delayed snapshot even on timeout
                 setTimeout(() => {
-                  console.log(`[SNAPSHOT-3s] scrollTop=${scrollContainer.scrollTop}px, height=${scrollContainer.scrollHeight}px, drift=${Math.abs(scrollContainer.scrollTop - savedScrollTop).toFixed(2)}px`);
+                  console.log(
+                    `[SNAPSHOT-3s] scrollTop=${scrollContainer.scrollTop}px, height=${scrollContainer.scrollHeight}px, drift=${Math.abs(scrollContainer.scrollTop - savedScrollTop).toFixed(2)}px`
+                  );
                 }, 3000);
               }
             }, 100);
           } else {
             // console.log(`Refreshed: ${context.path}`);
           }
-
         } catch (error) {
           console.error('Failed to refresh document:', error);
         }
@@ -364,7 +445,44 @@ const plugin: JupyterFrontEndPlugin<void> = {
       rank: 0
     });
 
+    // Also expose the command on the main-area tab context menu. HTML files open
+    // in the rendered HTML viewer, whose sandboxed iframe swallows right-clicks, so
+    // the .jp-Document menu above is unreachable over the rendered content; the tab
+    // gives a working refresh affordance for those documents. This selector matches
+    // the one JupyterLab core uses for its own tab menu (Close Tab, etc.).
+    app.contextMenu.addItem({
+      command: command,
+      selector: '#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab',
+      rank: 0
+    });
+
     console.log('Context menu items registered for refresh view extension');
+
+    // Add a refresh button to the HTML viewer toolbar. The rendered HTML lives in a
+    // sandboxed iframe that captures right-clicks (showing the browser's own menu), so
+    // a context menu over the rendered content is impossible; the toolbar button gives
+    // an in-view refresh affordance next to the "Trust HTML" control.
+    class RefreshViewButton
+      implements
+        DocumentRegistry.IWidgetExtension<
+          IDocumentWidget,
+          DocumentRegistry.IModel
+        >
+    {
+      createNew(panel: IDocumentWidget): IDisposable {
+        const button = new ToolbarButton({
+          icon: refreshIcon,
+          tooltip: 'Refresh View',
+          onClick: () => {
+            app.shell.activateById(panel.id);
+            void app.commands.execute(command);
+          }
+        });
+        panel.toolbar.insertItem(0, 'refreshView', button);
+        return new DisposableDelegate(() => button.dispose());
+      }
+    }
+    app.docRegistry.addWidgetExtension('HTML Viewer', new RefreshViewButton());
   }
 };
 

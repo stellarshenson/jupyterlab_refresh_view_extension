@@ -24,6 +24,7 @@ The extension provides intelligent content refresh while preserving your exact p
 - **Intelligent Stabilization** - Monitors content loading and adaptively restores position as cells render, stabilizing within 300ms typically
 - **Tabular Data Viewer Compatibility** - Works with jupyterlab_tabular_data_viewer_extension to refresh CSV files in custom tabular view
 - **Context Menu Integration** - Right-click access for markdown files, notebooks, text editors, and tabular data viewers
+- **HTML Viewer Support** - Refresh rendered HTML files from a toolbar button or the tab context menu (the sandboxed iframe prevents an in-content menu)
 - **Command Palette Access** - Available under "File Operations" category
 - **Smart Enable/Disable** - Only active when a document with reloadable context is open
 
@@ -58,6 +59,8 @@ jupyter labextension install jupyterlab_refresh_view_extension
 2. Right-click anywhere in the document content
 3. Select **"Refresh View"** from the context menu
 4. The file reloads from disk while maintaining your scroll position
+
+For HTML files (rendered in the HTML viewer), use the refresh button in the viewer toolbar or right-click the file's tab - the rendered content sits in a sandboxed iframe where a context menu cannot appear.
 
 Alternatively, open the command palette (`Ctrl+Shift+C` or `Cmd+Shift+C`) and search for "Refresh View".
 

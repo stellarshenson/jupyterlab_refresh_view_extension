@@ -2,6 +2,19 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 1.2.27 (2026-06-25)
+
+### Added
+
+- Refresh View now works for HTML files opened in the rendered HTML viewer
+- Refresh button on the HTML viewer toolbar
+- Refresh View item on the document tab context menu
+
+### Changed
+
+- Upgraded `@jupyterlab` dependencies to 4.4.10 (added `@jupyterlab/ui-components`, `@lumino/disposable`)
+- Adopted Makefile v1.32 with project-local `.nodeenv` isolation
+
 ## 1.2.8 (2025-11-11)
 
 ### Bug Fixes
