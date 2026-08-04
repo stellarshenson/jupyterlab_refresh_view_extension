@@ -2,6 +2,20 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 1.2.28 (2026-08-04)
+
+### Fixed
+
+- Removed a duplicate refresh icon in the HTML viewer header - JupyterLab core already ships a refresh button, so the extension no longer adds its own
+
+### Changed
+
+- HTML file refresh guidance now points to the tab context menu (the removed toolbar button was JupyterLab core's, which does not preserve scroll position)
+
+### Removed
+
+- Unused dependencies `@jupyterlab/docregistry`, `@jupyterlab/ui-components`, `@lumino/disposable` (orphaned by the toolbar button removal)
+
 ## 1.2.27 (2026-06-25)
 
 ### Added

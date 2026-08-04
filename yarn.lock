@@ -2274,7 +2274,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/docregistry@npm:^4.0.0, @jupyterlab/docregistry@npm:^4.4.10":
+"@jupyterlab/docregistry@npm:^4.4.10":
   version: 4.4.10
   resolution: "@jupyterlab/docregistry@npm:4.4.10"
   dependencies:
@@ -2640,7 +2640,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/ui-components@npm:^4.0.0, @jupyterlab/ui-components@npm:^4.4.10":
+"@jupyterlab/ui-components@npm:^4.4.10":
   version: 4.4.10
   resolution: "@jupyterlab/ui-components@npm:4.4.10"
   dependencies:
@@ -2879,7 +2879,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/disposable@npm:^1.10.0 || ^2.0.0, @lumino/disposable@npm:^2.0.0, @lumino/disposable@npm:^2.1.4":
+"@lumino/disposable@npm:^1.10.0 || ^2.0.0, @lumino/disposable@npm:^2.1.4":
   version: 2.1.4
   resolution: "@lumino/disposable@npm:2.1.4"
   dependencies:
@@ -6693,14 +6693,11 @@ __metadata:
     "@jupyterlab/apputils": ^4.0.0
     "@jupyterlab/builder": ^4.0.0
     "@jupyterlab/docmanager": ^4.0.0
-    "@jupyterlab/docregistry": ^4.0.0
     "@jupyterlab/filebrowser": ^4.0.0
     "@jupyterlab/markdownviewer": ^4.0.0
     "@jupyterlab/notebook": ^4.0.0
     "@jupyterlab/settingregistry": ^4.0.0
     "@jupyterlab/testutils": ^4.0.0
-    "@jupyterlab/ui-components": ^4.0.0
-    "@lumino/disposable": ^2.0.0
     "@types/jest": ^29.2.0
     "@types/json-schema": ^7.0.11
     "@types/react": ^18.0.26
@@ -7210,8 +7207,8 @@ __metadata:
   linkType: hard
 
 "node-gyp@npm:latest":
-  version: 13.0.0
-  resolution: "node-gyp@npm:13.0.0"
+  version: 13.0.1
+  resolution: "node-gyp@npm:13.0.1"
   dependencies:
     env-paths: ^2.2.0
     exponential-backoff: ^3.1.1
@@ -7221,11 +7218,11 @@ __metadata:
     semver: ^7.3.5
     tar: ^7.5.4
     tinyglobby: ^0.2.12
-    undici: ^6.25.0
+    undici: ^8.4.1
     which: ^7.0.0
   bin:
     node-gyp: bin/node-gyp.js
-  checksum: 73368e5ea0b5f66ab6ab7ce8d9a2ff60486c24dbcd20997f2f38e845a7c9ff21b8763e187242a99063ca2f0344f65f511d3e60da90acb1240403ec1b8ab97d05
+  checksum: 9d4e0eeaa415ca33a85278ecf2bdb61a7c32649e9423ec7743912b97e58169606ef44504f7d3a746cd9179f50c8d37d5bb70ae76fbc4803122f7747e819453f6
   languageName: node
   linkType: hard
 
@@ -7510,9 +7507,9 @@ __metadata:
   linkType: hard
 
 "picomatch@npm:^4.0.4":
-  version: 4.0.4
-  resolution: "picomatch@npm:4.0.4"
-  checksum: 76b387b5157951422fa6049a96bdd1695e39dd126cd99df34d343638dc5cdb8bcdc83fff288c23eddcf7c26657c35e3173d4d5f488c4f28b889b314472e0a662
+  version: 4.0.5
+  resolution: "picomatch@npm:4.0.5"
+  checksum: 44f305aa44f33c15d304f2e887409961d1c14eebd465b5553d8aefddcfe7b5e40d208148adef8c21a21183dda2fdba1e83c8a56918e3b5e5d3db6bcaba5b7e12
   languageName: node
   linkType: hard
 
@@ -8629,15 +8626,15 @@ __metadata:
   linkType: hard
 
 "tar@npm:^7.5.4":
-  version: 7.5.16
-  resolution: "tar@npm:7.5.16"
+  version: 7.5.22
+  resolution: "tar@npm:7.5.22"
   dependencies:
     "@isaacs/fs-minipass": ^4.0.0
     chownr: ^3.0.0
     minipass: ^7.1.2
     minizlib: ^3.1.0
     yallist: ^5.0.0
-  checksum: 9b7f886f5ce8681a7430f80b9b377bfa498e6feb957b9afe6507db08e59d309f8546b7f76a0c2e47bdb54da4602575a5c7519e287fe94de8302e635032fc94f1
+  checksum: e1434f40954410d191ab6d89017bfd40c24869cfd319d19dd74f84db13cbea15370a22bc9b8ecd699d05c2777ec6297f35dac318ed4829b6e776a7cb4f1f7c68
   languageName: node
   linkType: hard
 
@@ -8904,10 +8901,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.25.0":
-  version: 6.27.0
-  resolution: "undici@npm:6.27.0"
-  checksum: 3c3c591d9cc70b72ed20ec19fcbab04f184827bcb05241a215f92a081e6e73cab506cd2b334e3beb359304c2e53b6e8722c31327124d9db8122bb06fed7be372
+"undici@npm:^8.4.1":
+  version: 8.10.0
+  resolution: "undici@npm:8.10.0"
+  checksum: 6b7c5442ec67fb4048a07aba719890904be54fbcff83c58b7133011fead67877c970f8b974f5e05aa0c7f5603c726888d8b3648e891af1493e7e362d848d7e9c
   languageName: node
   linkType: hard
 

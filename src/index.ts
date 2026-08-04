@@ -3,19 +3,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, ToolbarButton } from '@jupyterlab/apputils';
+import { ICommandPalette } from '@jupyterlab/apputils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { refreshIcon } from '@jupyterlab/ui-components';
-
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
 /**
  * Settings interface
@@ -457,32 +451,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
 
     console.log('Context menu items registered for refresh view extension');
-
-    // Add a refresh button to the HTML viewer toolbar. The rendered HTML lives in a
-    // sandboxed iframe that captures right-clicks (showing the browser's own menu), so
-    // a context menu over the rendered content is impossible; the toolbar button gives
-    // an in-view refresh affordance next to the "Trust HTML" control.
-    class RefreshViewButton
-      implements
-        DocumentRegistry.IWidgetExtension<
-          IDocumentWidget,
-          DocumentRegistry.IModel
-        >
-    {
-      createNew(panel: IDocumentWidget): IDisposable {
-        const button = new ToolbarButton({
-          icon: refreshIcon,
-          tooltip: 'Refresh View',
-          onClick: () => {
-            app.shell.activateById(panel.id);
-            void app.commands.execute(command);
-          }
-        });
-        panel.toolbar.insertItem(0, 'refreshView', button);
-        return new DisposableDelegate(() => button.dispose());
-      }
-    }
-    app.docRegistry.addWidgetExtension('HTML Viewer', new RefreshViewButton());
   }
 };
 
