@@ -96,6 +96,10 @@
         "lib0": "0.2.111",
         "webpack": "5.106.0"
     },
+    "overrides": {
+        "lib0": "0.2.111",
+        "webpack": "5.106.0"
+    },
     "sideEffects": [
         "style/*.css",
         "style/index.js"

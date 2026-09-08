@@ -131,3 +131,4 @@ dmypy.json
 # Analysis and build scratch output
 tmp/
 logs/
+junit.xml
