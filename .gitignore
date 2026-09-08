@@ -124,3 +124,7 @@ dmypy.json
 
 # Yarn cache
 .yarn/
+
+# Analysis and build scratch output
+tmp/
+logs/
