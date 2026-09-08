@@ -1,5 +1,16 @@
-# Makefile for Jupyterlab extensions version 1.38
+# Makefile for Jupyterlab extensions version 1.39
 # changelog:
+#   1.39 - upgrade no longer runs `npm audit fix --force`; it reports with
+#          `jlpm npm audit --recursive` instead. Measured on six extensions on
+#          2026-09-08: the forced fix rewrote every @jupyterlab/* range to a 0.x
+#          release predating JupyterLab 4 (application ^0.18.6, testutils ^0.2.4,
+#          rendermime ^0.18.4) while printing that it would install 4.6.3, and
+#          because npm updates a yarn.lock it finds, it rewrote the Yarn Berry
+#          lockfile in the Yarn 1 format. Every project had to restore package.json
+#          and both lockfiles from git by hand. Any `npm audit fix`, forced or not,
+#          rewrites yarn.lock the same way, so the target reports advisories and
+#          changes nothing; `jlpm up` remains the one upgrade step. The report exits
+#          1 whenever an advisory stands, hence the `|| true`.
 #   1.38 - keep `python -m build` as the build command, approve blocked npm install
 #          scripts, and audit-fix on upgrade.
 #          A local edit in one project had swapped `python -m build` for
@@ -224,7 +235,7 @@ install_dependencies:
 ## upgrade all npm and yarn dependencies
 upgrade: check_dependencies
 	jlpm up
-	$(NPM) audit fix --force || true
+	jlpm npm audit --recursive || true
 
 ## cleanup all build and metabuild artefacts (including the project-local nodeenv)
 mrproper: clean uninstall
