@@ -3,7 +3,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import { Dialog, ICommandPalette, showDialog } from '@jupyterlab/apputils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -151,8 +151,26 @@ const plugin: JupyterFrontEndPlugin<void> = {
         }
 
         try {
-          // Reload the document from disk
+          // Unsaved edits would be lost by the revert; ask before discarding them
+          if (context.model.dirty) {
+            const result = await showDialog({
+              title: 'Discard unsaved changes?',
+              body: `${context.path.split('/').pop()} has unsaved changes. Refreshing reloads the file from disk and discards them.`,
+              buttons: [
+                Dialog.cancelButton(),
+                Dialog.warnButton({ label: 'Discard' })
+              ]
+            });
+            if (!result.button.accept) {
+              return;
+            }
+          }
+
+          // Reload the document from disk. The revert writes the file into
+          // the model, which marks it dirty, and JupyterLab does not clear
+          // the flag itself; the document now equals the file, so it is clean.
           await context.revert();
+          context.model.dirty = false;
 
           // console.log(`[REVERT] After revert: scrollTop=${scrollContainer?.scrollTop}px, height=${scrollContainer?.scrollHeight}px`);
 
