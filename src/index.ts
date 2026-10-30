@@ -22,10 +22,10 @@ interface IRefreshViewSettings {
 }
 
 /**
- * Initialization data for the jupyterlab_refresh_view_extension extension.
+ * Initialization data for the @stellarshenson/jupyterlab-refresh-view-extension extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'jupyterlab_refresh_view_extension:plugin',
+  id: '@stellarshenson/jupyterlab-refresh-view-extension:plugin',
   description:
     'A JupyterLab to allow context menu option to refresh markdown or notebook',
   autoStart: true,
@@ -39,7 +39,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     console.log(
-      'JupyterLab extension jupyterlab_refresh_view_extension is activated!'
+      'JupyterLab extension @stellarshenson/jupyterlab-refresh-view-extension is activated!'
     );
 
     // Settings with defaults

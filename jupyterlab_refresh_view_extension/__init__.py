@@ -12,5 +12,5 @@ except ImportError:
 def _jupyter_labextension_paths():
     return [{
         "src": "labextension",
-        "dest": "jupyterlab_refresh_view_extension"
+        "dest": "@stellarshenson/jupyterlab-refresh-view-extension"
     }]

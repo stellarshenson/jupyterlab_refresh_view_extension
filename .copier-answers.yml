@@ -8,7 +8,7 @@ has_ai_rules: false
 has_binder: false
 has_settings: false
 kind: frontend
-labextension_name: jupyterlab_refresh_view_extension
+labextension_name: '@stellarshenson/jupyterlab-refresh-view-extension'
 project_short_description: A JupyterLab to allow context menu option to refresh markdown
     or notebook
 python_name: jupyterlab_refresh_view_extension
