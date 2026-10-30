@@ -1,5 +1,70 @@
-# Makefile for Jupyterlab extensions version 1.39
+# Makefile for Jupyterlab extensions version 1.46
 # changelog:
+#   1.46 - increment_version also writes the new version into package-lock.json, in
+#          its top-level `version` and in `packages[""].version`, when the project
+#          has that file, and publish stages it in the metadata commit. 1.41 stopped
+#          writing package-lock.json but the projects kept the file, so the version
+#          recorded there stopped moving. Measured on 2026-10-14: 8 of 48 extensions
+#          with a package-lock.json recorded an older version there than in
+#          package.json, the oldest 1.2.31 against 1.2.73. The two values are replaced
+#          in the text, because 6 of the 48 lockfiles are indented with 4 spaces and a
+#          JSON rewrite would re-indent them. Requested on 2026-10-14.
+#   1.45 - `install` installs every optional-dependencies group of pyproject.toml
+#          with the wheel, so one `make install` leaves the runtime and the optional
+#          dependencies in place. Until now it installed the wheel alone, and the
+#          `dev` and `test` groups stayed as the image had them. Measured on
+#          2026-10-03: a rebuilt container had lost pytest, `make install` reported
+#          success twice, and `make publish` then stopped in `test` with "No module
+#          named '_pytest'". The optional groups are installed in a second pip run
+#          without --force-reinstall, so a build whose groups are already in place
+#          reinstalls none of them. Requested on 2026-10-03.
+#   1.44 - check_dependencies reports pytest missing when the package has a tests/
+#          directory, and install_dependencies then installs the `test` extras that
+#          pyproject.toml lists. `test` has run pytest since 1.36 and `publish` runs
+#          `test` since 1.41, yet no target installed it: a dev env worked only where
+#          the image happened to ship pytest. Measured on 2026-09-30: a Python 3.14
+#          image answered "No module named pytest" after `make install` had reported
+#          success, so `test`, and with it `publish`, had no pytest to run.
+#          Frontend-only extensions (no tests/ directory) are unaffected.
+#   1.43 - the auth gate in `test` loads the source tree being released, not the wheel
+#          the last `make install` left in site-packages: `python script.py` puts only
+#          the script's own directory on sys.path, and `publish` runs `test` before
+#          `install`, so the gate checked the previous build.
+#   1.42 - increment_version moves from `publish` onto `install`, so every
+#          `make install` raises the patch version again, as it did through 1.40.
+#          `publish` reaches it through `install` and still raises it exactly once;
+#          `make build` alone leaves the version as it is. Requested on 2026-09-25.
+#   1.41 - increment_version moves off `build` and onto `publish`; `publish` gains
+#          `test`; the metadata commit and push happen BEFORE either registry is
+#          written to; `npm install` and package-lock.json are dropped.
+#          Measured on 2026-09-20 against jupyterlab_advanced_paste_content_extension.
+#          With increment_version on the build chain, a routine `make install`
+#          rewrote a deliberately pinned 1.0.0, and a build that FAILED in tsc still
+#          consumed the bump - 1.0.0 became 1.0.2 for one artefact that never
+#          existed. No published version can be rebuilt, because building it again
+#          produces the next one. The release path also never reached `test`: the
+#          string `test` appeared nowhere in publish's prerequisite chain, so jest,
+#          pytest and check_auth.py - the gate that exists to catch a handler
+#          missing @tornado.web.authenticated - could not block a release.
+#          `git push` ran AFTER both uploads and aborts outright on a repository
+#          with no remote, leaving npm and PyPI written and the operator reading a
+#          red target; and an npm success followed by a twine failure forks the two
+#          registries permanently, because npm never re-serves a consumed version.
+#          Committing first costs nothing when a later step fails.
+#          `$(NPM) install` ran immediately before `jlpm install`, writing a
+#          package-lock.json that nothing reads - CI installs with jlpm, and npm
+#          honours `overrides` rather than the `resolutions` these projects pin
+#          with. `git add` then named that file, and on a project which never
+#          produces it the add fails on an unmatched pathspec, so the commit and
+#          push never run at all.
+#   1.40 - publish stages yarn.lock in the post-publish commit. It staged only
+#          package.json and package-lock.json, and `git add package.json` takes every
+#          change in that file, so a dependency added since the last commit went out
+#          without its yarn.lock entry. CI installs with an immutable lockfile and
+#          failed both workflows on that commit with YN0028 "The lockfile would have
+#          been modified by this install" (measured on 2026-09-14, release 1.0.12 of
+#          jupyterlab_advanced_markdown_viewer_extension). The staged yarn.lock is the
+#          one `jlpm install` wrote for the build that was published.
 #   1.39 - upgrade no longer runs `npm audit fix --force`; it reports with
 #          `jlpm npm audit --recursive` instead. Measured on six extensions on
 #          2026-09-08: the forced fix rewrote every @jupyterlab/* range to a 0.x
@@ -109,6 +174,8 @@ PYTHON_NAME = $(shell $(NODE) -p "require('./package.json').jupyterlab.outputDir
 # "allowScripts". Space-separated; extend per project.
 ALLOW_SCRIPTS_PKGS := @fortawesome/fontawesome-free
 
+# package-lock.json is edited in place, not parsed and written back: a rewrite with a
+# fixed indent would re-indent every line of a lockfile that uses another indent.
 ## increment project version
 increment_version: check_dependencies
 	@CURRENT_VERSION="$(VERSION)"; \
@@ -123,6 +190,9 @@ increment_version: check_dependencies
 		echo "increment_version: package.json still reports $$CURRENT_VERSION - not bumped" >&2; \
 		exit 1; \
 	fi; \
+	if [ -f package-lock.json ]; then \
+		$(NODE) -e 'const fs = require("fs"), v = process.argv[1]; let n = 0; const s = fs.readFileSync("package-lock.json", "utf8").replace(/"version": "[^"]*"/g, (m) => (n++ < 2 ? `"version": "$${v}"` : m)); const d = JSON.parse(s); if (d.version !== v || d.packages[""].version !== v) { console.error("increment_version: the first two version fields of package-lock.json are not the package version - not bumped"); process.exit(1); } fs.writeFileSync("package-lock.json", s);' "$$NEW_VERSION" || exit 1; \
+	fi; \
 	echo "New version: $$NEW_VERSION"
 
 # `python -m build` is the whole build. Its hatch-jupyter-builder hook runs the
@@ -131,15 +201,24 @@ increment_version: check_dependencies
 # bare `jupyter-builder build`: it emits no distribution at all, and after `clean` it
 # aborts with "Cannot find module lib/index.js" because it never runs tsc.
 ## build packages
-build: clean check_dependencies increment_version
-	$(NPM) install
+build: clean check_dependencies
 	jlpm install
 	jlpm prettier
 	python -m build
 
-## install package
-install: build
+# The wheel brings its runtime dependencies. The second pip run adds every
+# optional-dependencies group of pyproject.toml (`dev`, `test`, ...): pip sees the
+# wheel it has just installed, leaves it alone and installs only what a group still
+# lacks. It has no --force-reinstall, which would reinstall jupyterlab and its whole
+# dependency tree on every build. A pyproject.toml that cannot be read stops the target.
+## install package with its optional dependencies - raises the patch version first, so the build carries the new one
+install: increment_version build
 	pip install dist/*.whl --force-reinstall
+	@EXTRAS="$$(python -c "import tomllib; print(','.join(tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('optional-dependencies', {})))")" || exit 1; \
+	if [ -n "$$EXTRAS" ]; then \
+		echo "Installing the optional dependencies [$$EXTRAS]..."; \
+		pip install "$$(ls dist/*.whl)[$$EXTRAS]"; \
+	fi
 
 ## run tests
 test: check_dependencies
@@ -148,6 +227,12 @@ test: check_dependencies
 		pytest -vv -r ap; \
 	else \
 		echo "test: no $(PYTHON_NAME)/tests directory - skipping pytest"; \
+	fi
+	@if [ -f ".github/scripts/check_auth.py" ] && [ -d "$(PYTHON_NAME)/tests" ]; then \
+		echo "Checking every endpoint requires authentication..."; \
+		PYTHONPATH=$(CURDIR) python .github/scripts/check_auth.py; \
+	else \
+		echo "test: no .github/scripts/check_auth.py - skipping the auth gate"; \
 	fi
 
 ## clean builds and installables
@@ -171,6 +256,7 @@ check_dependencies:
 	python -m build --version >/dev/null 2>&1 || MISSING="$$MISSING build"; \
 	command -v jlpm >/dev/null 2>&1 || MISSING="$$MISSING jlpm"; \
 	{ [ -d node_modules ] && [ -n "$$(ls -A node_modules 2>/dev/null)" ]; } || MISSING="$$MISSING node_modules"; \
+	{ [ ! -d "$(PYTHON_NAME)/tests" ] || python -m pytest --version >/dev/null 2>&1; } || MISSING="$$MISSING pytest"; \
 	if [ -n "$$MISSING" ]; then \
 		echo "Missing dependencies:$$MISSING"; \
 		echo "Installing missing dependencies..."; \
@@ -179,17 +265,26 @@ check_dependencies:
 		echo "All dependencies are installed."; \
 	fi
 
+# Order is load-bearing. The version is raised once, by install. test runs before
+# install, so a red suite stops the release before the version moves. The commit
+# and push happen before either registry is written to: a failure there costs nothing,
+# whereas npm permanently consumes a version it has accepted.
 ## publish package to npm and PyPI
-publish: check_dependencies install
+publish: check_dependencies test install
 	@ls dist/*.whl >/dev/null 2>&1 && ls dist/*.tar.gz >/dev/null 2>&1 || { \
 		echo "publish: dist/ holds no wheel or sdist - run make build first" >&2; \
 		exit 1; \
 	}
-	$(NPM) publish --access public
-	python -m twine upload dist/*
-	git add package.json package-lock.json
-	git commit -m "chore: post-publish $$($(NODE) -p "require('./package.json').version") package metadata"
+	git add package.json yarn.lock $(wildcard package-lock.json)
+	git commit -m "chore: release $$($(NODE) -p "require('./package.json').version") package metadata"
 	git push
+	$(NPM) publish --access public
+	@python -m twine upload dist/* || { \
+		echo "publish: npm holds $$($(NODE) -p "require('./package.json').version") and PyPI does not." >&2; \
+		echo "Do NOT re-run publish - it would consume the next version on npm too." >&2; \
+		echo "Fix the credentials, then run: python -m twine upload dist/*" >&2; \
+		exit 1; \
+	}
 
 ## install required build dependencies into the project-local nodeenv (only what's missing)
 install_dependencies:
@@ -217,6 +312,11 @@ install_dependencies:
 	@if [ ! -d node_modules ] || [ -z "$$(ls -A node_modules 2>/dev/null)" ]; then \
 		echo "Installing project node_modules (jlpm install)..."; \
 		jlpm install; \
+	fi
+	@if [ -d "$(PYTHON_NAME)/tests" ] && ! python -m pytest --version >/dev/null 2>&1; then \
+		echo "Installing the test extras from pyproject.toml (pytest)..."; \
+		python -c "import tomllib; print('\n'.join(tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('optional-dependencies', {}).get('test', [])))" \
+			| xargs -r -d '\n' pip install; \
 	fi
 	@for pkg in $(ALLOW_SCRIPTS_PKGS); do \
 		if $(NPM) install-scripts approve "$$pkg" >/dev/null 2>&1; then \

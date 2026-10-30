@@ -7,3 +7,4 @@ jupyterlab_refresh_view_extension
 .claude
 eslint.config.mjs
 .venv
+.agents
