@@ -2,6 +2,12 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## [1.2.37] - 2026-10-31
+
+### Changed
+
+- Apply the template files and packages the upgrade left out
+
 ## [1.2.35] - 2026-10-31
 
 ### Changed
