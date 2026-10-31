@@ -20,7 +20,7 @@ JupyterLab extension (TypeScript/Python) providing "Refresh View" context menu c
 - GitHub Actions CI/CD (build + test_isolated)
 
 **Published Registries**:
-- npm: `jupyterlab_refresh_view_extension`
+- npm: `@stellarshenson/jupyterlab-refresh-view-extension`
 - PyPI: `jupyterlab-refresh-view-extension`
 
 ## Strengthened Rules

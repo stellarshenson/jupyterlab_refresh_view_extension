@@ -8,3 +8,4 @@ jupyterlab_refresh_view_extension
 eslint.config.mjs
 .venv
 .agents
+package-lock.json
