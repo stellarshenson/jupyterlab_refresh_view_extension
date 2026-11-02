@@ -75,3 +75,6 @@ This journal tracks substantive work on the JupyterLab Refresh View Extension.
 
 24. **Task - Require Python 3.12** (v1.2.38): raised the minimum Python to 3.12 on the owner's decision<br>
     **Result**: `requires-python` in `pyproject.toml` moved to `>=3.12`, and the classifiers for Python 3.10 and 3.11 are removed. Runtime floors already excluded older versions on some extensions, where pip then installed a release from before the scoped npm rename with no error. The dependency floors stay. `uv pip compile --python-version 3.12` resolves every runtime requirement, and CI runs Python 3.13.
+
+25. **Task - Build lifecycle brought to Makefile 1.48** (v1.2.38): the canonical Makefile went to every extension on 2026-11-02<br>
+    **Result**: Makefile 1.48 verbatim; mrproper now removes tmp, logs, .venv, graphify-out, coverage and .pytest_cache; install and publish are .NOTPARALLEL; the cleaned tree carries the tag CHECKPOINT_JUPYTERLAB_4.6.5_UPGRADE_PORTED_1.2.38.
