@@ -55,20 +55,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       settingRegistry
         .load(plugin.id)
         .then(loadedSettings => {
-          settings.notebookScrollRestoration = loadedSettings.get(
-            'notebookScrollRestoration'
-          ).composite as boolean;
-          settings.markdownScrollRestoration = loadedSettings.get(
-            'markdownScrollRestoration'
-          ).composite as boolean;
-          settings.notebookTimeout = loadedSettings.get('notebookTimeout')
-            .composite as number;
-          settings.markdownTimeout = loadedSettings.get('markdownTimeout')
-            .composite as number;
-          // console.log('[SETTINGS] Loaded:', settings);
-
-          // Watch for setting changes
-          loadedSettings.changed.connect(() => {
+          const read = () => {
             settings.notebookScrollRestoration = loadedSettings.get(
               'notebookScrollRestoration'
             ).composite as boolean;
@@ -79,8 +66,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
               .composite as number;
             settings.markdownTimeout = loadedSettings.get('markdownTimeout')
               .composite as number;
-            // console.log('[SETTINGS] Updated:', settings);
-          });
+          };
+          read();
+          // Watch for setting changes
+          loadedSettings.changed.connect(read);
         })
         .catch(reason => {
           console.error('[SETTINGS] Failed to load settings:', reason);
@@ -90,12 +79,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const command = 'jupyterlab_refresh_view:refresh';
 
+    // The tab menu item passes `tab`: a right-click does not activate a tab,
+    // so the command acts on the tab under the menu, not on the current widget.
+    const targetWidget = (args: { tab?: unknown }) => {
+      const tab = args.tab
+        ? app.contextMenuHitTest(
+            node =>
+              node.classList.contains('lm-TabBar-tab') && !!node.dataset.id
+          )
+        : undefined;
+      return (
+        (tab &&
+          Array.from(app.shell.widgets('main')).find(
+            w => w.id === tab.dataset.id
+          )) ||
+        app.shell.currentWidget
+      );
+    };
+
     // Add refresh command
     commands.addCommand(command, {
       label: 'Refresh View',
       caption: 'Refresh the current document view without scrolling',
-      execute: async () => {
-        const widget = app.shell.currentWidget;
+      execute: async args => {
+        const widget = targetWidget(args);
         if (!widget) {
           // console.log('No current widget');
           return;
@@ -220,18 +227,28 @@ const plugin: JupyterFrontEndPlugin<void> = {
             restorePosition();
             // console.log(`[RESTORE-START] After first restore: scrollTop=${scrollContainer.scrollTop}px`);
 
+            // A wheel, touch, key or pointer press in the document is the user
+            // taking over the scroll (keys and the scrollbar included); returns
+            // the function that stops listening.
+            const onUserInput = (handler: () => void) => {
+              const events = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+              events.forEach(name =>
+                widget.node.addEventListener(name, handler, {
+                  once: true,
+                  passive: true,
+                  capture: true
+                })
+              );
+              return () =>
+                events.forEach(name =>
+                  widget.node.removeEventListener(name, handler, true)
+                );
+            };
+
             // Detect user-initiated scrolling to stop restoration immediately
             let userScrollDetected = false;
-            const userScrollHandler = () => {
+            const stopWatching = onUserInput(() => {
               userScrollDetected = true;
-            };
-            scrollContainer.addEventListener('wheel', userScrollHandler, {
-              once: true,
-              passive: true
-            });
-            scrollContainer.addEventListener('touchstart', userScrollHandler, {
-              once: true,
-              passive: true
             });
 
             // Smart adaptive stabilization - tracks both scroll position AND content height changes
@@ -296,11 +313,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
               // Exit immediately if user starts scrolling
               if (userScrollDetected) {
                 clearInterval(intervalId);
-                scrollContainer.removeEventListener('wheel', userScrollHandler);
-                scrollContainer.removeEventListener(
-                  'touchstart',
-                  userScrollHandler
-                );
+                stopWatching();
                 return;
               }
 
@@ -326,14 +339,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
                 if (stableCount >= stabilityThreshold) {
                   clearInterval(intervalId);
                   // Clean up stabilization phase event listeners
-                  scrollContainer.removeEventListener(
-                    'wheel',
-                    userScrollHandler
-                  );
-                  scrollContainer.removeEventListener(
-                    'touchstart',
-                    userScrollHandler
-                  );
+                  stopWatching();
                   // Note: Image listeners auto-cleanup via { once: true } option
                   // console.log(`[DONE] Stabilized at ${scrollContainer.scrollTop}px after ${attempts} attempts, imagesLoaded=${loadedImageCount}/${totalImages}`);
 
@@ -346,32 +352,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
                     let guardUserScrollDetected = false;
 
                     // Detect user-initiated scrolling to exit guard mode immediately
-                    const guardUserScrollHandler = () => {
+                    const stopGuardWatching = onUserInput(() => {
                       guardUserScrollDetected = true;
-                    };
-                    scrollContainer.addEventListener(
-                      'wheel',
-                      guardUserScrollHandler,
-                      { once: true, passive: true }
-                    );
-                    scrollContainer.addEventListener(
-                      'touchstart',
-                      guardUserScrollHandler,
-                      { once: true, passive: true }
-                    );
+                    });
 
                     const guardIntervalId = setInterval(() => {
                       // Exit immediately if user starts scrolling
                       if (guardUserScrollDetected) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener(
-                          'wheel',
-                          guardUserScrollHandler
-                        );
-                        scrollContainer.removeEventListener(
-                          'touchstart',
-                          guardUserScrollHandler
-                        );
+                        stopGuardWatching();
                         return;
                       }
 
@@ -386,14 +375,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       guardAttempts++;
                       if (guardAttempts >= maxGuardAttempts) {
                         clearInterval(guardIntervalId);
-                        scrollContainer.removeEventListener(
-                          'wheel',
-                          guardUserScrollHandler
-                        );
-                        scrollContainer.removeEventListener(
-                          'touchstart',
-                          guardUserScrollHandler
-                        );
+                        stopGuardWatching();
                       }
                     }, 100);
                   }
@@ -411,20 +393,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
               if (attempts >= maxAttempts) {
                 clearInterval(intervalId);
                 // Clean up stabilization phase event listeners
-                scrollContainer.removeEventListener('wheel', userScrollHandler);
-                scrollContainer.removeEventListener(
-                  'touchstart',
-                  userScrollHandler
-                );
+                stopWatching();
                 // Note: Image listeners auto-cleanup via { once: true } option
-                // console.log(`[TIMEOUT] Max attempts (${maxAttempts}) reached, final scroll: ${scrollContainer.scrollTop}px, imagesLoaded=${loadedImageCount}/${totalImages}`);
-
-                // Take delayed snapshot even on timeout
-                setTimeout(() => {
-                  console.log(
-                    `[SNAPSHOT-3s] scrollTop=${scrollContainer.scrollTop}px, height=${scrollContainer.scrollHeight}px, drift=${Math.abs(scrollContainer.scrollTop - savedScrollTop).toFixed(2)}px`
-                  );
-                }, 3000);
               }
             }, 100);
           } else {
@@ -434,8 +404,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           console.error('Failed to refresh document:', error);
         }
       },
-      isEnabled: () => {
-        const widget = app.shell.currentWidget;
+      isEnabled: args => {
+        const widget = targetWidget(args);
         if (!widget) {
           return false;
         }
@@ -464,6 +434,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // the one JupyterLab core uses for its own tab menu (Close Tab, etc.).
     app.contextMenu.addItem({
       command: command,
+      args: { tab: true },
       selector: '#jp-main-dock-panel .lm-DockPanel-tabBar .lm-TabBar-tab',
       rank: 0
     });

@@ -47,12 +47,6 @@ The extension provides intelligent content refresh while preserving your exact p
 pip install jupyterlab-refresh-view-extension
 ```
 
-### From npm
-
-```bash
-jupyter labextension install jupyterlab_refresh_view_extension
-```
-
 ## Usage
 
 1. Open a markdown file, notebook, or text file in JupyterLab
