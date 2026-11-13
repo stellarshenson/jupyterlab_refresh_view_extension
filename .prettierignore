@@ -9,3 +9,6 @@ eslint.config.mjs
 .venv
 .agents
 package-lock.json
+docs/acc-crit*.md
+docs/defects*.md
+docs/pm-hand-edits.md
