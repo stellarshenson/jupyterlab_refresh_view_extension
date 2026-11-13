@@ -159,6 +159,25 @@ describe('Refresh View command', () => {
     expect(doc.scroller.scrollTop).toBe(120);
   });
 
+  it('restores the scroll position of a text editor', async () => {
+    // CodeMirror scrolls .cm-scroller, not the .jp-FileEditor around it
+    const doc = makeDoc('a', 'jp-FileEditor');
+    doc.scroller.innerHTML = '<div class="cm-scroller"></div>';
+    const scroller = doc.scroller.firstElementChild as HTMLElement;
+    doc.context.revert.mockImplementation(async () => {
+      scroller.scrollTop = 0;
+    });
+    scroller.scrollTop = 120;
+    const { options } = activate([doc]);
+    await options.execute({});
+    expect(scroller.scrollTop).toBe(120);
+
+    jest.advanceTimersByTime(400);
+    scroller.scrollTop = 0;
+    jest.advanceTimersByTime(200);
+    expect(scroller.scrollTop).toBe(120);
+  });
+
   it.each(['wheel', 'keydown', 'pointerdown', 'touchstart'])(
     'stops restoring when the user scrolls with %s',
     async name => {

@@ -69,11 +69,13 @@ Keeping the reader's position across the reload
   - log: 2026-11-13T09:20:25Z @kj added
   - log: 2026-11-13T09:23:26Z @kj closed
 - [x] `ACC-SCROLL-8-TEXT` **Markdown and text keep scrollTop** - HIGH; after the reload scrollTop is restored, and put back when something else moves it during markdownTimeout
-  - evidence: src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' passed; build_test.py 2026-11-13, version 1.2.40: Jest 13 of 13 passed, Galata 1 passed
-  - test: Jest src/**tests**/refresh.spec.ts 'restores the scroll position of a markdown or text document'
+  - related: DEF-SCROLL-6-EDITOR-SCROLLER
+  - evidence: src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' and 'restores the scroll position of a text editor' passed; build_test.py 2026-11-13, version 1.2.41: Jest 14 of 14, Galata 1; headless Chromium, 3000-line text file: .cm-scroller scrollTop 21099 before and 4000 ms after Refresh View
+  - test: Jest src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' and 'restores the scroll position of a text editor'
   - test-tags: UNIT
   - log: 2026-11-13T09:20:25Z @kj added
   - log: 2026-11-13T09:23:26Z @kj closed
+  - log: 2026-11-13T18:30:44Z @kj edited test "Jest src/**tests**/refresh.spec.ts 'restores the scroll position of a markdown or text document'" -> "Jest src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' and 'restores the scroll position of a text editor'"; evidence "src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' passed; build_test.py 2026-11-13, version 1.2.40: Jest 13 of 13 passed, Galata 1 passed" -> "src/__tests__/refresh.spec.ts 'restores the scroll position of a markdown or text document' and 'restores the scroll position of a text editor' passed; build_test.py 2026-11-13, version 1.2.41: Jest 14 of 14, Galata 1; headless Chromium, 3000-line text file: .cm-scroller scrollTop 21099 before and 4000 ms after Refresh View"
 - [x] `ACC-SCROLL-9-USER` **User scroll stops restoration** - HIGH; a wheel, touch, key press or pointer press in the document stops the restoration at once
   - evidence: src/__tests__/refresh.spec.ts 'stops restoring when the user scrolls with wheel, keydown, pointerdown, touchstart' passed; build_test.py 2026-11-13, version 1.2.40: Jest 13 of 13 passed, Galata 1 passed
   - test: Jest src/**tests**/refresh.spec.ts 'stops restoring when the user scrolls with %s'

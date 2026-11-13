@@ -46,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const settings: IRefreshViewSettings = {
       notebookScrollRestoration: true,
       markdownScrollRestoration: true,
-      notebookTimeout: 5000,
+      notebookTimeout: 30000,
       markdownTimeout: 3000
     };
 
@@ -118,7 +118,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         const scrollContainer =
           widget.node.querySelector('.jp-WindowedPanel-outer') ||
           widget.node.querySelector('.jp-RenderedMarkdown') ||
-          widget.node.querySelector('.jp-FileEditor');
+          widget.node.querySelector('.jp-FileEditor .cm-scroller');
 
         let savedScrollTop = 0;
         let savedScrollLeft = 0;
