@@ -19,7 +19,7 @@
     },
     "notebookTimeout": {
       "title": "Notebook Stabilization Timeout (milliseconds)",
-      "description": "Maximum duration to wait for notebook cell rendering and content stabilization. Increase for large notebooks with many cells.",
+      "description": "Maximum duration to wait for notebook cell rendering and content stabilization.",
       "type": "number",
       "default": 30000,
       "minimum": 1000,

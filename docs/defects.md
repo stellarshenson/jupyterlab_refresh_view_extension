@@ -71,6 +71,13 @@ Reading the settings
   - test-tags: UNIT
   - log: 2026-11-13T09:20:26Z @kj added
   - log: 2026-11-13T09:23:27Z @kj closed: fixed: one read function, called at load and connected to changed
+- [x] `DEF-SET-9-TIMEOUT-HINT` **notebookTimeout description says to increase a value already at its maximum** - MINOR; settings description of notebookTimeout ends 'Increase for large notebooks with many cells.'; default 30000 equals maximum 30000, so a user on the default cannot enter a higher value; `schema/plugin.json`
+  - evidence: grep -c 'Increase for large notebooks' schema/plugin.json prints 0; description reads 'Maximum duration to wait for notebook cell rendering and content stabilization.'
+  - repro: open Settings Editor, Refresh View, read the Notebook Stabilization Timeout description, then enter 30001
+  - test-tags: MANUAL
+  - root-cause: 2026-11-13T18:40:40Z @kj DEF-SCROLL-7-NB-TIMEOUT raised the default from 5000 to the maximum 30000 and left the hint written for the lower default
+  - log: 2026-11-13T18:40:40Z @kj added
+  - log: 2026-11-13T18:40:40Z @kj closed
 
 ## Documentation `DOCS`
 
