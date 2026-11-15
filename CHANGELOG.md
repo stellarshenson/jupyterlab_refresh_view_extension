@@ -2,6 +2,18 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## [1.2.43] - 2026-11-15
+
+### Changed
+
+- Keep prettier off the pm-tools trackers and ignore the PayPal link
+
+### Fixed
+
+- Remove the notebookTimeout hint that cannot be followed
+- Restore the scroll of a text editor and wait longer for a long notebook
+- Refresh the right-clicked tab and stop the scroll guard on keyboard input
+
 ## [1.2.38] - 2026-10-31
 
 ### Changed
